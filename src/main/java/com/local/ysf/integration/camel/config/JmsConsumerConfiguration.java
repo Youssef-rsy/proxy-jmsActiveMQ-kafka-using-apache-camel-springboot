@@ -1,12 +1,14 @@
 package com.local.ysf.integration.camel.config;
 
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+import org.apache.camel.component.kafka.springboot.KafkaComponentConfiguration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
+import org.springframework.jms.connection.JmsTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @EnableJms
@@ -29,7 +31,15 @@ public class JmsConsumerConfiguration {
     @Bean
     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+        factory.setSessionAcknowledgeMode(javax.jms.Session.CLIENT_ACKNOWLEDGE);
         factory.setConnectionFactory(receiverActiveMQConnectionFactory());
         return factory;
+    }
+
+    @Bean
+    public PlatformTransactionManager transactionManager() {
+        JmsTransactionManager jmsTransactionManager = new JmsTransactionManager();
+        jmsTransactionManager.setConnectionFactory(receiverActiveMQConnectionFactory());
+        return jmsTransactionManager;
     }
 }
