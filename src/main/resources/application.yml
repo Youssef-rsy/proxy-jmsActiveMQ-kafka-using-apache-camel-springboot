@@ -1,0 +1,51 @@
+server:
+  port: 9091
+
+spring:
+  application:
+    name: proxy-kafka-jms
+
+artemis:
+  broker-password: ${JMS_BROKER_PASSWORD:admin}
+  broker-url: ${JMS_BROKER_URL:tcp://127.0.0.1:61616}
+  broker-username: ${JMS_BROKER_USERNAME:admin}
+
+logging:
+  level:
+    ROOT: INFO
+
+camel:
+  springboot:
+    main-run-controller: true
+  component:
+    activemq:
+      broker-url: ${JMS_BROKER_URL:tcp://127.0.0.1:61616}
+      password: ${JMS_BROKER_PASSWORD:admin}
+      trust-all-packages: true
+      username: ${JMS_BROKER_USERNAME:admin}
+    kafka:
+      bridge-error-handler: true
+      brokers: ${KAFKA_BROKER_URL:127.0.0.1:9092}
+      request-required-acks: all
+      enable-idempotence: true
+      max-in-flight-request: 1
+      retries: 5
+      auto-commit-enable: false
+      auto-offset-reset: earliest
+      group-id: camelpoc
+      allow-manual-commit: true
+      break-on-first-error: true
+
+
+source-destination-config:
+  jmsToKafkaQueueTopicPairs:
+    - queue: camel2receiver
+      topic: jmstokafka
+    - queue: Camel2
+      topic: jmstokafka2
+
+  kafkaToJmsQueueTopicPairs:
+    - topic: jmstokafka
+      queue: camelreceiver
+    - topic: jmstokafka2
+      queue: camel2receiver
